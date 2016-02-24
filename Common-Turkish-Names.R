@@ -1,15 +1,16 @@
-setwd("C:/data")
+# create a directory for the work
+if(!dir.exists("TurkishNames")) {
+        dir.create("TurkishNames")
+}
+
+# set working directory
+setwd("TurkishNames")
 
 # getting the data from TUIK (Turkish Statistics Institute)
 maleURL <- "http://tuik.gov.tr/PreIstatistikTablo.do?istab_id=1332"
 femaleURL <- "http://tuik.gov.tr/PreIstatistikTablo.do?istab_id=1331"
 
-if(!dir.exists("TurkishNames")) {
-        dir.create("TurkishNames")
-}
-
-setwd("TurkishNames")
-
+# download files
 if(!file.exists("male.xls")){
         download.file(maleURL, destfile = "male.xls") 
 }
@@ -17,3 +18,40 @@ if(!file.exists("male.xls")){
 if(!file.exists("female.xls")){
         download.file(femaleURL, destfile = "female.xls") 
 }
+
+maleNames <- read.xlsx("male.xls", sheetIndex = 1, header = FALSE)
+femaleNames <- read.xlsx("female.xls", sheetIndex = 1, header = FALSE)
+
+# examine the data
+head(maleNames)
+tail(maleNames, 10)
+head(femaleNames)
+tail(femaleNames, 10)
+
+# rename header
+header <- maleNames[5, ]
+# there are factor variables in this row.
+# correct factor variables
+header[1] <- "name"
+header[ ,2] <- 1950
+header[ ,15] <- 1990
+header[ ,28] <- 2003
+# now rename the header. we can use it for both maleNames and femaleNames dataframes
+names(maleNames) <- header
+names(femaleNames) <- header
+
+# removing the rows with description
+maleNames <- maleNames[7:289, ] # we need to remove the first 6 rows and the rows after 289
+femaleNames <- femaleNames[7:321, ] # we need to remove the first 6 rows and the rows after 321
+
+# turn our data into tabular form with 3 variables: name, year, rank
+maleNamesTidy <- gather(maleNames, key = name, value = rank, na.rm = TRUE)
+names(maleNamesTidy) <- c("name", "year", "rank")
+femaleNamesTidy <- gather(femaleNames, key = name, value = rank, na.rm = TRUE)
+names(femaleNamesTidy) <- c("name", "year", "rank")
+
+# we can combine these two data frames. However, it had better to ad a factor variable sex.
+library(dplyr)
+maleNamesTidy <- mutate(maleNamesTidy, sex = "M")
+femaleNamesTidy <- mutate(femaleNamesTidy, sex = "F")
+namesData <- rbind(maleNamesTidy, femaleNamesTidy)

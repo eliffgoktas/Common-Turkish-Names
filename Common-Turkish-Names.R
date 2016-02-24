@@ -44,7 +44,7 @@ names(femaleNames) <- header
 maleNames <- maleNames[7:289, ] # we need to remove the first 6 rows and the rows after 289
 femaleNames <- femaleNames[7:321, ] # we need to remove the first 6 rows and the rows after 321
 
-# turn our data into tabular form with 3 variables: name, year, rank
+# turn our data into tabular form with 3 variables: name, year and rank
 maleNamesTidy <- gather(maleNames, key = name, value = rank, na.rm = TRUE)
 names(maleNamesTidy) <- c("name", "year", "rank")
 femaleNamesTidy <- gather(femaleNames, key = name, value = rank, na.rm = TRUE)
@@ -55,3 +55,6 @@ library(dplyr)
 maleNamesTidy <- mutate(maleNamesTidy, sex = "M")
 femaleNamesTidy <- mutate(femaleNamesTidy, sex = "F")
 namesData <- rbind(maleNamesTidy, femaleNamesTidy)
+
+# save the tidy data
+write.csv(namesData, file = "namesData.csv")

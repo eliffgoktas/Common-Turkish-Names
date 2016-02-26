@@ -19,19 +19,22 @@ if(!file.exists("female.xls")){
         download.file(femaleURL, destfile = "female.xls") 
 }
 
+# get data in the general environment
+library(xlsx)
 maleNames <- read.xlsx("male.xls", sheetIndex = 1, header = FALSE)
 femaleNames <- read.xlsx("female.xls", sheetIndex = 1, header = FALSE)
 
 # examine the data
-head(maleNames)
+head(maleNames, 10)
 tail(maleNames, 10)
-head(femaleNames)
+head(femaleNames, 10)
 tail(femaleNames, 10)
 
 # rename header
 header <- maleNames[5, ]
 # there are factor variables in this row.
 # correct factor variables
+
 header[1] <- "name"
 header[ ,2] <- 1950
 header[ ,15] <- 1990
@@ -45,12 +48,13 @@ maleNames <- maleNames[7:289, ] # we need to remove the first 6 rows and the row
 femaleNames <- femaleNames[7:321, ] # we need to remove the first 6 rows and the rows after 321
 
 # turn our data into tabular form with 3 variables: name, year and rank
+library(tidyr)
 maleNamesTidy <- gather(maleNames, key = name, value = rank, na.rm = TRUE)
 names(maleNamesTidy) <- c("name", "year", "rank")
 femaleNamesTidy <- gather(femaleNames, key = name, value = rank, na.rm = TRUE)
 names(femaleNamesTidy) <- c("name", "year", "rank")
 
-# we can combine these two data frames. However, it had better to ad a factor variable sex.
+# we can combine these two data frames. However, it had better to add a factor variable sex.
 library(dplyr)
 maleNamesTidy <- mutate(maleNamesTidy, sex = "M")
 femaleNamesTidy <- mutate(femaleNamesTidy, sex = "F")
